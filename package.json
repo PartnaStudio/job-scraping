@@ -1,0 +1,15 @@
+{
+  "name": "job-scraping",
+  "version": "1.0.0",
+  "description": "LinkedIn job scraping with Express server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "linkedin-jobs-api": "^1.0.7",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
