@@ -21,9 +21,11 @@ const defaultQueryOptions = {
 
 async function queryJobs(params) {
   if (!linkedIn) throw new Error('linkedin-jobs-api package not available');
-  const client = new linkedIn();
   const queryOptions = params && Object.keys(params).length > 0 ? params : defaultQueryOptions;
-  const response = await client.query(queryOptions);
+  if (typeof linkedIn.query !== 'function') {
+    throw new Error('linkedin-jobs-api does not expose query() - check package API');
+  }
+  const response = await linkedIn.query(queryOptions);
   return {
     success: true,
     data: response,
