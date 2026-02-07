@@ -75,7 +75,7 @@
             output.textContent = 'Fetching jobs...';
             
             try {
-                const response = await fetch('http://localhost:3000/api/jobs');
+                const response = await fetch('/.netlify/functions/jobs');
                 const data = await response.json();
                 output.textContent = JSON.stringify(data, null, 2);
             } catch (error) {
@@ -90,11 +90,11 @@
         // Check server on load
         window.addEventListener('load', async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/health');
+                const response = await fetch('/.netlify/functions/jobs?health=1');
                 const data = await response.json();
-                console.log('✅ Server connected:', data.status);
+                console.log('✅ Function connected:', data.status);
             } catch (error) {
-                console.error('❌ Cannot connect to server at localhost:3000');
+                console.error('❌ Cannot connect to Netlify function');
             }
         });
     </script>

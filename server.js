@@ -25,49 +25,46 @@ const defaultQueryOptions = {
   under_10_applicants: false,
 };
 
+// Core query function (exported for serverless wrappers)
+async function queryJobs(params) {
+  const queryOptions = params && Object.keys(params).length > 0
+    ? params
+    : defaultQueryOptions;
+
+  console.log('queryJobs called with:', queryOptions);
+
+  const response = await linkedIn.query(queryOptions);
+  return {
+    success: true,
+    data: response,
+    count: Array.isArray(response) ? response.length : 0,
+    queryOptions
+  };
+}
+
+module.exports.queryJobs = queryJobs;
+
 // API endpoint to fetch LinkedIn jobs
 app.post('/api/jobs', async (req, res) => {
   try {
-    // Accept query options from request body or use defaults
-    const queryOptions = req.body && Object.keys(req.body).length > 0 
-      ? req.body 
-      : defaultQueryOptions;
-
-    console.log('Query options received:', queryOptions);
-
-    const response = await linkedIn.query(queryOptions);
-    res.json({
-      success: true,
-      data: response,
-      count: response.length,
-      queryOptions: queryOptions
-    });
+    const params = req.body && Object.keys(req.body).length > 0 ? req.body : {};
+    const result = await queryJobs(params);
+    res.json(result);
   } catch (error) {
     console.error('Error fetching jobs:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      queryOptions: req.body
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // GET endpoint with default options (for backward compatibility)
 app.get('/api/jobs', async (req, res) => {
   try {
-    const response = await linkedIn.query(defaultQueryOptions);
-    res.json({
-      success: true,
-      data: response,
-      count: response.length,
-      queryOptions: defaultQueryOptions
-    });
+    const params = req.query && Object.keys(req.query).length > 0 ? req.query : {};
+    const result = await queryJobs(params);
+    res.json(result);
   } catch (error) {
     console.error('Error fetching jobs:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -76,8 +73,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`📋 Jobs API available at http://localhost:${PORT}/api/jobs`);
-  console.log(`✅ CORS enabled - you can fetch from frontend applications`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`📋 Jobs API available at http://localhost:${PORT}/api/jobs`);
+    console.log(`✅ CORS enabled - you can fetch from frontend applications`);
+  });
+}
